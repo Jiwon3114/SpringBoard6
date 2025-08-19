@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.board.users.mapper.UserMapper">  
+  <!-- 목록조회 -->
+  <select id="getUserList"  
+          resultType = "com.board.users.domain.UserDTO" >
+  
+     SELECT      USERID,  
+                 PASSWD,  
+                 USERNAME,
+                 EMAIL,
+                 UPOINT,
+                 CASE  
+                   WHEN  UPOINT BETWEEN 0      AND      50000  THEN  '새싹회원'
+                   WHEN  UPOINT BETWEEN 50001  AND     100000  THEN  '나무회원'
+                   WHEN  UPOINT BETWEEN 100001 AND 9999999999  THEN  '숲회원'                 
+                 END AS MEMLEVEL,
+                 TO_CHAR(INDATE, 'YYYY-MM-DD DY') INDATE
+      FROM       TUSER 
+      ORDER  BY  INDATE ASC
+  
+  </select>
+  
+  <!-- getUser -->
+  <select  id="getUser" 
+           resultType = "com.board.users.domain.UserDTO" >
+     
+     SELECT      USERID,  
+                 PASSWD,  
+                 USERNAME,
+                 EMAIL,
+                 UPOINT,
+                 TO_CHAR(INDATE, 'YYYY-MM-DD DY') INDATE
+      FROM       TUSER  
+     WHERE       USERID =  #{  userid  }  
+  
+  
+  </select>
+  
+  <select id="login">
+  
+     SELECT      USERID,  
+                 PASSWD,  
+                 USERNAME,
+                 EMAIL,
+                 UPOINT,
+                 INDATE
+      FROM       TUSER  
+     WHERE       USERID =  #{  userid  }  
+      AND        PASSWD =  #{  passwd  }  
+  
+  </select>
+  
+  <insert  id="insertUser">
+    INSERT INTO TUSER (
+	    USERID,
+	    PASSWD,
+	    USERNAME,
+	    EMAIL,
+	    UPOINT,
+	    INDATE
+	) VALUES (
+	    #{ userid   },
+	    #{ passwd   },
+	    #{ username },
+	    #{ email    },
+	    1000,
+	    sysdate
+	)
+  
+  </insert>
+  
+  <delete  id="deleteUser">
+  
+    DELETE   FROM    TUSER
+     WHERE   USERID  =  #{userid} 
+  
+  </delete>
+  
+  <update  id="updateUser">
+  
+  	UPDATE   TUSER
+  	 SET     PASSWD    = #{ passwd   },
+  	         USERNAME  = #{ username },  
+  	         EMAIL     = #{ email    }
+  	 WHERE   USERID    = #{ userid   }
+  
+  </update>
+  
+</mapper>
+
+
+
+

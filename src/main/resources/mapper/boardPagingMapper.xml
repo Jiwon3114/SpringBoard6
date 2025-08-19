@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.board.paging.mapper.BoardPagingMapper">  
+  
+  <!-- menu_id 해당하는 게시물 자료수 -->
+  <select id="count">
+  
+      SELECT   COUNT(*)  AS CNT
+       FROM    BOARD
+       WHERE   MENU_ID  =  #{ menu_id } 
+  
+  </select>
+  
+  <!-- 
+     getBoardPagingList(String menu_id, int offset, int recordSize); 
+       menu_id : param1, offset: param2, recordSize : param3
+     arg0 는 안됨  
+  -->
+  <select  id="getBoardPagingList">
+  
+    SELECT
+	    IDX,
+	    MENU_ID,
+	    TITLE,
+	    WRITER,
+	    TO_CHAR(REGDATE, 'YYYY-MM-DD') REGDATE,
+	    HIT
+	FROM
+	    BOARD
+	 WHERE     MENU_ID = #{ param1 }   
+	 ORDER BY IDX  DESC   
+       OFFSET  #{ param2 }  ROWS FETCH NEXT #{ param3 } ROWS ONLY
+  
+  </select>
+  
+  <select  id="getBoard">
+  
+   SELECT
+	    IDX,
+	    MENU_ID,
+	    TITLE,
+	    CONTENT ,
+	    WRITER,
+	    TO_CHAR(REGDATE, 'YYYY-MM-DD HH24:MI:SS DAY') REGDATE,
+	    HIT
+	FROM
+	    BOARD
+    WHERE    IDX   =  #{ idx }
+      
+  </select>
+  
+  <select  id="getBoardByIdx">
+  
+   SELECT
+	    IDX,
+	    MENU_ID,
+	    TITLE,
+	    CONTENT ,
+	    WRITER,
+	    TO_CHAR(REGDATE, 'YYYY-MM-DD HH24:MI:SS DAY') REGDATE,
+	    HIT
+	FROM
+	    BOARD
+    WHERE    IDX   =  #{ param1 }
+      
+  </select>
+        
+  <!--  insertBoard -->
+  <select id="insertBoard">
+  
+     INSERT INTO BOARD (
+	    IDX,
+	    MENU_ID,
+	    TITLE,
+	    CONTENT,
+	    WRITER,
+	    REGDATE,
+	    HIT
+	) VALUES ( 
+  		( SELECT NVL(MAX(IDX),0)+1 FROM BOARD ) ,
+        #{ menu_id  },
+        #{ title    },
+        #{ content  },
+        #{ writer   },
+        SYSDATE,
+        0 
+    )  
+     
+  </select>    
+     
+  <!-- int idx -> param1 -->   
+  <update  id="incHit">
+     UPDATE   BOARD
+      SET     HIT = HIT + 1
+      WHERE   IDX  =  #{ param1 }
+  
+  </update>    
+  
+  <!-- IDX 롤 글삭제 int idx -> param1 -->
+  <delete  id="deleteBoard">
+  	
+  	DELETE   FROM  BOARD
+  	 WHERE   IDX   =  #{ param1 }  
+  
+  </delete>
+  
+  <update  id="updateBoard">
+     
+     UPDATE    BOARD
+      SET      TITLE   =  #{ title   }
+             , CONTENT =  #{ content }
+      WHERE    IDX     =  #{ idx     }      
+  
+  
+  </update>
+  
+  
+  
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

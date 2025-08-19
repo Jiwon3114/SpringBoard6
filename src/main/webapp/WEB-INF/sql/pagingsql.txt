@@ -1,0 +1,105 @@
+-- 데이블에 샘플 데이터를 추가 : 1000개
+페이징 : 데이터베이스에서 필요한 데이터를
+         일정한 갯수만큼 조회하는 방법
+         대량의 데이터를 10개 씩 가져온다  
+ 
+ -------------------------
+ 테스트 용 샘플데이터 추가하기
+ CREATE TABLE  POST2
+ AS
+   SELECT * FROM POST
+    WHERE  1=0;
+        
+ 
+ truncate table post2;
+ DECLARE
+    DATA1   VARCHAR2(100) := '샘플동';
+ BEGIN
+    FOR  I  IN  1 .. 10000  
+    LOOP
+       INSERT INTO  POST2 (ZIPCODE, SIDO, GUGUN, DONG, BUNJI, SEQ)
+         VALUES (  trim(TO_CHAR(i,'000000')), '부산','부산진구', DATA1 || I, NULL, I);
+    END LOOP;
+    COMMIT;
+ END;
+ /
+         
+-------------------------------------      
+         
+
+SELECT  * FROM POST;
+
+-- 전채자료수   -- 52144
+SELECT  COUNT(*) FROM POST;
+
+--  페이지수
+--- 한페이지 당 출력수 : 10개
+
+-- 페이지
+--  전체자료수 / 페에지당출력수
+--  52144 / 10
+SELECT  52144 / 10 FROM DUAL;         -- 5214.4 무조건 올림
+
+SELECT  CEIL(52144 / 10) FROM DUAL;    -- 5215 무조건 올림
+
+SELECT  * FROM POST
+ WHERE  DONG LIKE '%중앙%'
+ ORDER BY SEQ DESC;
+
+ORACLE 번호붙이기 방법
+1. 10G : ROWNUM
+  
+2. 11G : ROW_NUMBER()
+
+3. 12C 이후 :  OFFSET .. FETCH , MYSQL LIMIT 방식
+
+SELECT  * FROM POST
+ WHERE  DONG LIKE '%중앙%'
+ ORDER BY SEQ DESC;
+
+
+SELECT  ROW_NUMBER() OVER ( ORDER BY SEQ DESC ) RN,
+        ZIPCODE, SIDO, GUGUN, DONG, BUNJI, SEQ FROM POST
+ WHERE  DONG LIKE '%중앙%';
+ ;
+
+2 페이지 10개슬 가져오세요
+줄 번호 11 - 20
+
+SELECT  ROW_NUMBER() OVER ( ORDER BY SEQ DESC ) RN,
+        ZIPCODE, SIDO, GUGUN, DONG, BUNJI, SEQ 
+ FROM POST
+ WHERE  DONG LIKE '%중앙%'
+  AND   RN   BETWEEN 11 AND 20
+ ;    -- ORA-00904: "RN": 부적합한 식별자 실행순서
+
+SET TIMIMG ON 
+SELECT  * 
+ FROM (
+    SELECT  ROW_NUMBER() OVER ( ORDER BY SEQ DESC ) RN,
+            ZIPCODE, SIDO, GUGUN, DONG, BUNJI, SEQ 
+     FROM   POST
+     WHERE  DONG LIKE '%중앙%'
+ ) T
+ WHERE T.RN  BETWEEN  11 AND 20;  -- 경과 시간: 00:00:00.411
+ 
+ 3. OFFSET  ... FETCH ...
+ 
+ MYSQL
+   SELECT  ZIPCODE, SIDO, GUGUN, DONG, BUNJI, SEQ FROM POST
+    WHERE  DONG LIKE '%중앙%' 
+    LIMIT 0, 10
+ 
+ SET TIMIMG ON    
+ ORACLE
+  SELECT    ZIPCODE, SIDO, GUGUN, DONG, BUNJI, SEQ FROM POST
+    WHERE   DONG LIKE '%중앙%' 
+    OFFSET  30 ROWS FETCH NEXT 10 ROWS ONLY;  -- 경과 시간: 00:00:00.359
+    -- 30(0~) 번 자료부터 다음 10 ROWS 가져온다 (31번줄 부터10개 가져온다) 
+
+
+
+
+
+
+
